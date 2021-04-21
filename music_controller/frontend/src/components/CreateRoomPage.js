@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button , Grid, Typography, TextField, FormHelperText, FormControl, Radio, FormControlLabel, RadioGroup} from "@material-ui/core"
 import { Link } from 'react-router-dom'
 import getCookie from './util';
-
 const csrftoken = getCookie('csrftoken');
 
 export default class CreateRoomPage extends Component {
