@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Grid, Button, Typography} from "@material-ui/core";
 import getCookie from './util';
 import CreateRoomPage from "./CreateRoomPage";
+import MusicPlayer from "./MusicPlayer";
 const csrftoken = getCookie('csrftoken');
 export default class Room extends Component {
     constructor(props) {
@@ -23,7 +24,6 @@ export default class Room extends Component {
       this.authenticateSpotify = this.authenticateSpotify.bind(this);
       this.getCurrentSong = this.getCurrentSong.bind(this);
       this.getRoomDetails();
-      // this.getCurrentSong();
     }
     
 
@@ -140,7 +140,7 @@ export default class Room extends Component {
               Code: {this.roomCode}
             </Typography>
           </Grid>
-          {/* {this.state.song} */}
+          <MusicPlayer {...this.state.song}/>
           {this.state.isHost ? this.renderSettingsButton(): null}
           <Grid item xs={12} align="center">
             <Button
