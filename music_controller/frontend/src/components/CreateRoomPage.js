@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Button , Grid, Typography, TextField, FormHelperText, FormControl, Radio, FormControlLabel, RadioGroup} from "@material-ui/core"
+import { Collapse, Button , Grid, Typography, TextField, FormHelperText, FormControl, Radio, FormControlLabel, RadioGroup} from "@material-ui/core"
 import { Link } from 'react-router-dom'
 import getCookie from './util';
+import Alert from "@material-ui/lab/Alert";
 const csrftoken = getCookie('csrftoken');
+
 
 export default class CreateRoomPage extends Component {
     static defaultProps = {
@@ -18,11 +20,14 @@ export default class CreateRoomPage extends Component {
       this.state = {
         guestCanPause: this.props.guestCanPause,
         votesToSkip: this.props.votesToSkip,
+        errorMsg: "",
+        successMsg: "",
       };
   
       this.handleRoomButtonPressed = this.handleRoomButtonPressed.bind(this);
       this.handleVotesChange = this.handleVotesChange.bind(this);
       this.handleGuestCanPauseChange = this.handleGuestCanPauseChange.bind(this);
+      this.handleUpdateButtonPressed = this.handleUpdateButtonPressed.bind(this);
     }
   
     handleVotesChange(e) {
@@ -50,6 +55,31 @@ export default class CreateRoomPage extends Component {
         .then((response) => response.json())
         .then((data) => this.props.history.push('/room/' + data.code));
     }
+    handleUpdateButtonPressed(){
+      const requestOptions = {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" , "X-CSRFToken": csrftoken},
+        body: JSON.stringify({
+          votes_to_skip: this.state.votesToSkip,
+          guest_can_pause: this.state.guestCanPause,
+          code: this.props.roomCode,
+        }),
+      };
+      fetch("/api/update-room", requestOptions)
+        .then((response) => {
+          if (response.ok){
+            this.setState({
+              successMsg : "Room updated successfully!"
+            });
+          } else {
+            this.setState({
+              errorMsg : "Error updating room..."
+            });
+          }
+          this.props.updateCallback();
+        });
+        
+    }
     renderCreateButtons(){
       return (
         <Grid container spacing={1}>
@@ -76,7 +106,7 @@ export default class CreateRoomPage extends Component {
         <Button
           color="primary"
           variant="contained"
-          onClick={this.handleRoomButtonPressed}
+          onClick={this.handleUpdateButtonPressed}
         >
           Update Room
         </Button>
@@ -89,6 +119,15 @@ export default class CreateRoomPage extends Component {
         <Grid container spacing={1}>
           <Grid item xs={12} align="center">
             <Typography component="h4" variant="h4">
+              <Collapse in={this.state.errorMsg != "" || this.state.successMsg != ""}>
+                {this.state.successMsg != ""
+                ? (<Alert severity="success" onClose={() => {this.setState({successMsg : ""})}}>{this.state.successMsg}</Alert>)
+                : (<Alert severity="error" onClose={() => {this.setState({errorMsg : ""})}}>{this.state.errorMsg}</Alert>)} 
+              </Collapse>
+            </Typography>
+          </Grid>
+          <Grid item xs={12} align="center">
+            <Typography component="h4" variant="h4">
               {title}
             </Typography>
           </Grid>
@@ -99,7 +138,7 @@ export default class CreateRoomPage extends Component {
               </FormHelperText>
               <RadioGroup
                 row
-                defaultValue="true"
+                defaultValue={this.props.guestCanPause.toString()}
                 onChange={this.handleGuestCanPauseChange}
               >
                 <FormControlLabel
